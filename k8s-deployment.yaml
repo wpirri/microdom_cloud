@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microdom-cloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microdom-cloud
+  template:
+    metadata:
+      labels:
+        app: microdom-cloud
+    spec:
+      containers:
+        - name: microdom-cloud
+          image: wpirri/microdom_cloud:latest
+          ports:
+            - containerPort: 8081
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: etc
+              mountPath: /app/etc
+      volumes:
+        - name: logs
+          hostPath:
+            path: /var/log/microdom
+            type: DirectoryOrCreate
+        - name: etc
+          hostPath:
+            path: /etc
+            type: Directory
+            
