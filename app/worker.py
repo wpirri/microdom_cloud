@@ -13,8 +13,11 @@ async def send_post():
         remote_port = get_config_value("REMOTE_PORT", "443")
         target_url = f"{remote_proto}://{remote_host}:{remote_port}/cgi-bin/dompi_cloud_notif.cgi"
         try:
+            logger.info(f"POST {target_url}")
             response = await client.post(target_url, json={"service": "microdom_cloud"})
-            logger.info(f"POST {target_url} -> {response.status_code}")
+            logger.info(f"Response: {response.status_code}")
+            if(response.status_code == 200):
+                logger.info(f"POST successful: {response.text}")
         except Exception as e:
             logger.error(f"Error enviando POST: {e}")
 

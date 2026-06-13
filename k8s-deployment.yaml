@@ -17,6 +17,11 @@ spec:
           image: wpirri/microdom_cloud:latest
           ports:
             - containerPort: 8081
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: etc
+              mountPath: /app/etc
           livenessProbe:
             httpGet:
               path: /health
@@ -29,11 +34,6 @@ spec:
               port: 8081
             initialDelaySeconds: 3
             periodSeconds: 5
-          volumeMounts:
-            - name: logs
-              mountPath: /app/logs
-            - name: etc
-              mountPath: /app/etc
       volumes:
         - name: logs
           hostPath:
