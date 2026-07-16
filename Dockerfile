@@ -10,8 +10,10 @@ RUN mkdir -p /app/etc
 # Crear directorio de la app
 WORKDIR /app
 
+# Copiar dependencias
 COPY requirements.txt .
 
+# Instalar dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código
@@ -24,6 +26,8 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Exponer puerto
-EXPOSE 8081
+EXPOSE 8082
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8081"]
+# Ejecutar la app
+#CMD ["python", "run.py"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8082"]

@@ -1,10 +1,8 @@
-Solicitud inicial al Copilot:
-Tengo de hacer un microservicio en python que luego voy a ejecutar en docker y kubernetes.
-El microservicio debe hacer un POST HTTPS a un servidor determinado cada 3 segundos.
-
-¿Querés que lo adaptemos a FastAPI con un endpoint  y métricas Prometheus, o preferís mantenerlo como un worker puro sin servidor HTTP?
-
-Si, adaptalo a FastAPI y agregale el endpoint /health. Además el servicio se va a llamar microdom_cloud. Pasame todos los archivos que necesito de nuevo con estas apataciones.
+==========================================================================================
+Centralizador en la nube de servicio de domotica domiciliario
+Se ejecuta en un servidor accesible a travez de internet, permite administrar los
+sistemas hogareños asociados desde un navegador o desde Alexa
+==========================================================================================
 
 Crear entorno virtual:
     python -m venv microdom
@@ -15,38 +13,36 @@ Entrar a entorno virtual:
 Salir de entorno virtual
     deactivate
 
+Docker
+==========================================================================================
 
-microdom_cloud/
-│
-├── app/
-│   ├── main.py
-│   ├── worker.py
-│   ├── config.py
-│   └── __init__.py
-│
-├── requirements.txt
-├── Dockerfile
-└── k8s-deployment.yaml
+Crear imagen utilizando DockerFile con etiqueta microdom
+    docker build -t microdom-cloud .
 
-docker build -t microdom-cloud .
+Ejecutar el contenedor con volumen persistente y variables de entorno
 
-docker run -p 8081:8081 -v /var/log/microdom:/app/logs -v /etc:/app/etc microdom-cloud
-docker run -p 8081:8081 -v /var/log/microdom:/app/logs -v /etc:/app/etc microdom-cloud -d --restart unless-stopped --name microdom-cloud
+docker run --rm -it \
+  -e DBUSER=dompi_web \
+  -e DBPASSWORD=dompi_web \
+  -e DBHOST=192.168.10.32 \
+  -e DBNAME=DB_DOMPIWEB \
+  --name microdom-cloud \
+  -v /etc/microdom.conf:/app/etc/microdom.conf \
+  -v /var/log/microdom:/app/logs \
+  -v /var/lib/microdom/html:/app/html \
+  -v /var/lib/microdom/download:/app/download \
+  -p 8082:8082 microdom-cloud
 
-docker ps
-docker ps -a
-docker container prune (Borra los exited)
-docker rm 424c42019953 (Borra el ID)
-
-docker stop boring_kapitsa
-docker update --restart unless-stopped boring_kapitsa
-docker start boring_kapitsa
-
-Para Subit al Git
-    git add .
-    git commit -m "Algun comentario"
-    git push
-
-Para subir a GHCR
-    docker build -t microdom-cloud:latest .
-    docker tag microdom-cloud:latest ghcr.io/wpirri/microdom-cloud:latest
+Daemon:
+docker run --rm -it \
+  -d --restart unless-stopped \
+  -e DBUSER=dompi_web \
+  -e DBPASSWORD=dompi_web \
+  -e DBHOST=192.168.10.32 \
+  -e DBNAME=DB_DOMPIWEB \
+  --name microdom-cloud \
+  -v /etc/microdom.conf:/app/etc/microdom.conf \
+  -v /var/log/microdom:/app/logs \
+  -v /var/lib/microdom/html:/app/html \
+  -v /var/lib/microdom/download:/app/download \
+  -p 8082:8082 microdom-cloud
