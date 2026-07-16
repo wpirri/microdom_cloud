@@ -29,9 +29,8 @@ async def abmsys_post(request: Request):
     logger.info(f"    Headers: {headers}")
     logger.info(f"    Query Params: {request_params}")
     logger.info(f"    Form Data: {data}")
-    logger.info(f"    Request Body: {await request.body()}")
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 # dompi_cloud_abmuser.cgi
 @router.get("/dompi_cloud_abmuser.cgi")
@@ -41,7 +40,7 @@ async def abmsys_get(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 @router.post("/dompi_cloud_abmuser.cgi")
 async def abmsys_post(request: Request):
@@ -53,7 +52,7 @@ async def abmsys_post(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 # dompi_cloud_alarma.cgi
 @router.get("/dompi_cloud_alarma.cgi")
@@ -63,7 +62,7 @@ async def abmsys_get(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 @router.post("/dompi_cloud_alarma.cgi")
 async def abmsys_post(request: Request):
@@ -75,7 +74,7 @@ async def abmsys_post(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 # dompi_cloud_amazon.cgi
 @router.get("/dompi_cloud_amazon.cgi")
@@ -85,7 +84,7 @@ async def abmsys_get(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 @router.post("/dompi_cloud_amazon.cgi")
 async def abmsys_post(request: Request):
@@ -97,7 +96,7 @@ async def abmsys_post(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 # dompi_cloud_mobile.cgi
 @router.get("/dompi_cloud_mobile.cgi")
@@ -107,7 +106,7 @@ async def abmsys_get(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 @router.post("/dompi_cloud_mobile.cgi")
 async def abmsys_post(request: Request):
@@ -119,7 +118,7 @@ async def abmsys_post(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 # dompi_cloud_status.cgi
 @router.get("/dompi_cloud_status.cgi")
@@ -129,7 +128,7 @@ async def abmsys_get(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
 
 @router.post("/dompi_cloud_status.cgi")
 async def abmsys_post(request: Request):
@@ -141,4 +140,4 @@ async def abmsys_post(request: Request):
     # Headers (variables del navegador)
     headers = dict(request.headers)
 
-    return {"error=0&message=Ok"}
+    return {"error": 0, "message": "Ok"}
