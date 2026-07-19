@@ -44,8 +44,28 @@ def update_client_data(system, ass_id, objeto, tipo, estado, icono_apagado, icon
  
 
 
-
-
-
-
-
+"""
+CREATE TABLE TB_DOMCLOUD_USER (
+Usuario varchar(256),
+Clave varchar(256),
+Id_Sistema varchar(256),
+Amazon_Key varchar(256),
+Google_Key varchar(256),
+Apple_Key varchar(256),
+Other_Key varchar(256),
+Errores integer DEFAULT 0,
+Ultima_Conexion bigint DEFAULT 0,
+Estado integer DEFAULT 0,     -- 0 Disable, 1 Enable
+Time_Stamp bigint,
+PRIMARY KEY (Usuario)
+);
+"""
+def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, apple_key, other_key):
+    if usuario != None and id_sistema != None and clave != None:
+        query = f"UPDATE TB_DOMCLOUD_USER SET Time_Stamp = UNIX_TIMESTAMP(), Clave='{clave}', Id_Sistema='{id_sistema}', Amazon_Key='{amazon_key}', Google_Key='{google_key}', Apple_Key='{apple_key}', Other_Key='{other_key}' WHERE Usuario='{usuario}'"
+        if mysql_execute(query) == 0:
+            query = f"INSERT INTO TB_DOMCLOUD_USER (Usuario, Clave, Id_Sistema, Amazon_Key, Google_Key, Apple_Key, Other_Key, Time_Stamp) VALUES ('{usuario}', '{clave}', '{id_sistema}', '{amazon_key}', '{google_key}', '{apple_key}', '{other_key}', UNIX_TIMESTAMP())"
+            if mysql_execute(query) > 0:
+                logger.info(f"Usuario {usuario} de cliente {id_sistema} agregado al sistema")
+        else:
+            logger.info(f"Usuario {usuario} de cliente {id_sistema} actualizado")
