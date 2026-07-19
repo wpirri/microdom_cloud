@@ -3,10 +3,10 @@
 docker stop microdom-cloud
 sleep 3
 docker run --rm -it \
-  -e DBUSER=dompi_web \
-  -e DBPASSWORD=dompi_web \
+  -e DBUSER=dompi_cloud \
+  -e DBPASSWORD=dompi_cloud \
   -e DBHOST=192.168.10.32 \
-  -e DBNAME=DB_DOMPIWEB \
+  -e DBNAME=DB_DOMPICLOUD \
   --name microdom-cloud \
   -v /etc/microdom.conf:/app/etc/microdom.conf \
   -v /var/log/microdom:/app/logs \

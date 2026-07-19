@@ -21,7 +21,7 @@ kind: ConfigMap
 metadata:
   name: microdom-config
 data:
-  microdom.conf: |
+  microdom.conf:
     REMOTE_HOST=witchblade.com.ar
     REMOTE_PORT=443
     REMOTE_PROTO=https
@@ -199,8 +199,8 @@ metadata:
   name: microdom
 type: Opaque
 stringData:
-  DBUSER: "dompi_web"
-  DBPASSWORD: "dompi_web"
+  DBUSER: "dompi_cloud"
+  DBPASSWORD: "dompi_cloud"
   DBHOST: "192.168.10.32"
-  DBNAME: "DB_DOMPIWEB"
+  DBNAME: "DB_DOMPICLOUD"
   
