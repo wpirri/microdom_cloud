@@ -29,8 +29,8 @@ docker run --rm -it \
   --name microdom-cloud \
   -v /etc/microdom.conf:/app/etc/microdom.conf \
   -v /var/log/microdom:/app/logs \
-  -v /var/lib/microdom/html:/app/html \
-  -v /var/lib/microdom/download:/app/download \
+  -v /var/lib/microdom_cloud/html:/app/html \
+  -v /var/lib/microdom_cloud/download:/app/download \
   -p 8082:8082 microdom-cloud
 
 Daemon:
@@ -43,6 +43,11 @@ docker run --rm -it \
   --name microdom-cloud \
   -v /etc/microdom.conf:/app/etc/microdom.conf \
   -v /var/log/microdom:/app/logs \
-  -v /var/lib/microdom/html:/app/html \
-  -v /var/lib/microdom/download:/app/download \
+  -v /var/lib/microdom_cloud/html:/app/html \
+  -v /var/lib/microdom_cloud/download:/app/download \
   -p 8082:8082 microdom-cloud
+
+
+docker logs <nombre_o_id>
+docker logs -f <container>
+docker logs --tail 100 -t <container>

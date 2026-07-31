@@ -1,13 +1,15 @@
-from fastapi import FastAPI, HTTPException
+import base64
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.log_utils import get_daily_logger
+from app.auth_utils import get_user_auth, auth_token_valid
 
 from app.routers import cgi_bin, download
 
 app = FastAPI(
-    title="Microservicio comunicacion con dispositivos de domotica",
+    title="Administración remota de sistemas de domótica",
     version="1.0.0"
 )
 
@@ -29,23 +31,90 @@ def health():
     return {"status": "ok"}
 
 @app.get("/", response_class=HTMLResponse)
-def index():
-    file_path = BASE_DIR / "index.html"
-    # Validar existencia
-    if not file_path.exists() or not file_path.is_file():
-        raise HTTPException(status_code=404, detail="Archivo no encontrado")
-    return FileResponse(file_path)
+def root():
+    return FileResponse(BASE_DIR / "login.html")
 
 @app.get("/{filename}", response_class=HTMLResponse)
-def root(filename: str):
+def filename_get(filename: str, request: Request):
     file_path = BASE_DIR / filename
+
+    logger.info(f"[GET] {filename}")
+
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
+
+    auth_header = request.headers.get("authorization")
+    if not auth_header:
+        logger.info(f"[GET] {filename} - No auth header")
+        return FileResponse(BASE_DIR / "login.html")
+
+    scheme, _, credentials = auth_header.partition(" ")
+    if scheme.lower() != "basic" or not credentials:
+        logger.info(f"[GET] {filename} - No Basic auth")
+        return FileResponse(BASE_DIR / "login.html")
+
+    try:
+        decoded = base64.b64decode(credentials).decode("utf-8")
+        user, password = decoded.split(":", 1)
+    except Exception:
+        return FileResponse(BASE_DIR / "login.html")
+
+    if user == "token_auth":
+        logger.info(f"[GET] {filename} - Identificado Token Auth")
+        if not auth_token_valid(password):
+            logger.info(f"[GET] {filename} - Token Auth no valido")
+            return FileResponse(BASE_DIR / "login.html")
+    else:
+        user_auth = get_user_auth(user, password)
+        logger.info(f"[GET] {filename} - User Auth: {user_auth}")
+        if not user_auth:
+            return FileResponse(BASE_DIR / "login.html")
+
     return FileResponse(file_path)
 
+@app.post("/{filename}", response_class=HTMLResponse)
+def filename_post(filename: str, request: Request):
+    file_path = BASE_DIR / filename
+
+    logger.info(f"[POST] {filename}")
+
+    # Validar existencia
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+
+    auth_header = request.headers.get("authorization")
+    if not auth_header:
+        logger.info(f"[POST] {filename} - No auth header")
+        return FileResponse(BASE_DIR / "login.html")
+
+    scheme, _, credentials = auth_header.partition(" ")
+    if scheme.lower() != "basic" or not credentials:
+        logger.info(f"[POST] {filename} - No Basic auth")
+        return FileResponse(BASE_DIR / "login.html")
+
+    try:
+        decoded = base64.b64decode(credentials).decode("utf-8")
+        user, password = decoded.split(":", 1)
+    except Exception:
+        return FileResponse(BASE_DIR / "login.html")
+
+    if user == "token_auth":
+        logger.info(f"[POST] {filename} - Identificado Token Auth")
+        if not auth_token_valid(password):
+            logger.info(f"[POST] {filename} - Token Auth no valido")
+            return FileResponse(BASE_DIR / "login.html")
+    else:
+        user_auth = get_user_auth(user, password)
+        logger.info(f"[POST] {filename} - User Auth: {user_auth}")
+        if not user_auth:
+            return FileResponse(BASE_DIR / "login.html")
+
+    return FileResponse(file_path)
+
+
 @app.get("/data/{filename}", response_class=HTMLResponse)
-def root(filename: str):
+def root_data(filename: str):
     file_path = BASE_DIR / "data" / filename
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
