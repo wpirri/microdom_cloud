@@ -177,15 +177,15 @@ spec:
 
         - name: html-volume
           hostPath:
-            path: /var/lib/microdom/html
+            path: /var/lib/microdom_cloud/html
             type: DirectoryOrCreate
         - name: download-volume
           hostPath:
-            path: /var/lib/microdom/download
+            path: /var/lib/microdom_cloud/download
             type: DirectoryOrCreate
         - name: upload-volume
           hostPath:
-            path: /var/lib/microdom/upload
+            path: /var/lib/microdom_cloud/upload
             type: DirectoryOrCreate
       imagePullSecrets:
         - name: ghcr
