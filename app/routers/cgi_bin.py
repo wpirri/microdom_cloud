@@ -6,6 +6,23 @@ logger = get_daily_logger()
 
 router = APIRouter(prefix="/cgi-bin", tags=["cgi"])
 
+# objetos.cgi
+@router.get("/objetos.cgi")
+async def objetos_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    #headers = dict(request.headers)
+    #
+    funcion = request_params.get("funcion", None)
+    grupo = request_params.get("grupo", None)
+    if funcion == "list":
+        return {"error": 0, "message": "Ok"}
+
+
+
+    return {"error": 0, "message": "Ok"}
+
 @router.post("/dompi_cloud_notif.cgi")
 async def dompi_cloud_notif_post(request: Request):
     # Leer el POST

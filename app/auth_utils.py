@@ -8,13 +8,13 @@ def get_user_auth(user, password):
         return None
     logger.info(f"[get_user_auth] User: {user} Password: {password}")
 
-    return {"user":"auth_token", "password": "uHvt5rOP"}
+    return {"key":"auth_token", "value": "uHvt5rOP"}
 
 def auth_token_valid(auth_token):
     logger.info(f"[auth_token_valid] Token: {auth_token}")
 
     if auth_token == "uHvt5rOP":
-        return True
+        return "D3S4RR0LL0-0001"
     else:
-        return False
+        return None
     

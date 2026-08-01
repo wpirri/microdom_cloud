@@ -1,4 +1,3 @@
-import base64
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -37,80 +36,67 @@ def root():
 @app.get("/{filename}", response_class=HTMLResponse)
 def filename_get(filename: str, request: Request):
     file_path = BASE_DIR / filename
-
     logger.info(f"[GET] {filename}")
-
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
 
-    auth_header = request.headers.get("authorization")
-    if not auth_header:
-        logger.info(f"[GET] {filename} - No auth header")
-        return FileResponse(BASE_DIR / "login.html")
+    auth_token = request.cookies.get("auth_token", None)
+    if auth_token != None:
+        system = auth_token_valid(auth_token)
+        if system != None:
+            return FileResponse(file_path)
 
-    scheme, _, credentials = auth_header.partition(" ")
-    if scheme.lower() != "basic" or not credentials:
-        logger.info(f"[GET] {filename} - No Basic auth")
-        return FileResponse(BASE_DIR / "login.html")
-
-    try:
-        decoded = base64.b64decode(credentials).decode("utf-8")
-        user, password = decoded.split(":", 1)
-    except Exception:
-        return FileResponse(BASE_DIR / "login.html")
-
-    if user == "token_auth":
-        logger.info(f"[GET] {filename} - Identificado Token Auth")
-        if not auth_token_valid(password):
-            logger.info(f"[GET] {filename} - Token Auth no valido")
-            return FileResponse(BASE_DIR / "login.html")
-    else:
-        user_auth = get_user_auth(user, password)
-        logger.info(f"[GET] {filename} - User Auth: {user_auth}")
-        if not user_auth:
-            return FileResponse(BASE_DIR / "login.html")
-
-    return FileResponse(file_path)
+    return FileResponse(BASE_DIR / "login.html")
 
 @app.post("/{filename}", response_class=HTMLResponse)
-def filename_post(filename: str, request: Request):
+async def filename_post(filename: str, request: Request):
     file_path = BASE_DIR / filename
-
     logger.info(f"[POST] {filename}")
-
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
 
-    auth_header = request.headers.get("authorization")
-    if not auth_header:
-        logger.info(f"[POST] {filename} - No auth header")
-        return FileResponse(BASE_DIR / "login.html")
+    auth_token = request.cookies.get("auth_token", None)
 
-    scheme, _, credentials = auth_header.partition(" ")
-    if scheme.lower() != "basic" or not credentials:
-        logger.info(f"[POST] {filename} - No Basic auth")
-        return FileResponse(BASE_DIR / "login.html")
+    if filename == "login.html":
+        # Leer el POST
+        form = await request.form()   # ← parsea x-www-form-urlencoded
+        data = dict(form)
 
-    try:
-        decoded = base64.b64decode(credentials).decode("utf-8")
-        user, password = decoded.split(":", 1)
-    except Exception:
-        return FileResponse(BASE_DIR / "login.html")
+        if auth_token != None:
+            system = auth_token_valid(auth_token)
+            if system != None:
+                return FileResponse(BASE_DIR / "menu.html")
 
-    if user == "token_auth":
-        logger.info(f"[POST] {filename} - Identificado Token Auth")
-        if not auth_token_valid(password):
-            logger.info(f"[POST] {filename} - Token Auth no valido")
-            return FileResponse(BASE_DIR / "login.html")
+        user = data.get("user", None)
+        password = data.get("password", None)
+
+        if not user or not password:
+            return FileResponse(file_path)
+
+        logger.info(f"[POST] {filename} - Usuario: {user} - Clave: {password}")
+
+        auth_result = get_user_auth(user, password)
+        if auth_result is None:
+            return FileResponse(file_path)
+
+        response = FileResponse(BASE_DIR / "menu.html")
+        response.set_cookie(
+            key=auth_result["key"],
+            value=auth_result["value"],
+            httponly=True,
+            samesite="lax",
+            max_age=3600
+        )
+        return response
     else:
-        user_auth = get_user_auth(user, password)
-        logger.info(f"[POST] {filename} - User Auth: {user_auth}")
-        if not user_auth:
-            return FileResponse(BASE_DIR / "login.html")
+        if auth_token != None:
+            system = auth_token_valid(auth_token)
+            if system != None:
+                return FileResponse(file_path)
 
-    return FileResponse(file_path)
+        return FileResponse(BASE_DIR / "login.html")
 
 
 @app.get("/data/{filename}", response_class=HTMLResponse)

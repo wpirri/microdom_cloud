@@ -69,3 +69,8 @@ def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, 
                 logger.info(f"Usuario {usuario} de cliente {id_sistema} agregado al sistema")
         else:
             logger.info(f"Usuario {usuario} de cliente {id_sistema} actualizado")
+
+def get_object():
+    query = "SELECT * FROM TB_DOMCLOUD_ASSIGN"
+    result = mysql_query(query)
+    return result
