@@ -60,11 +60,11 @@ Time_Stamp bigint,
 PRIMARY KEY (Usuario)
 );
 """
-def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, apple_key, other_key):
+def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, apple_key, other_key, estado):
     if usuario != None and id_sistema != None and clave != None:
-        query = f"UPDATE TB_DOMCLOUD_USER SET Time_Stamp = UNIX_TIMESTAMP(), Clave='{clave}', Id_Sistema='{id_sistema}', Amazon_Key='{amazon_key}', Google_Key='{google_key}', Apple_Key='{apple_key}', Other_Key='{other_key}' WHERE Usuario='{usuario}'"
+        query = f"UPDATE TB_DOMCLOUD_USER SET Time_Stamp = UNIX_TIMESTAMP(), Clave='{clave}', Id_Sistema='{id_sistema}', Amazon_Key='{amazon_key}', Google_Key='{google_key}', Apple_Key='{apple_key}', Other_Key='{other_key}', Estado={estado} WHERE Usuario='{usuario}'"
         if mysql_execute(query) == 0:
-            query = f"INSERT INTO TB_DOMCLOUD_USER (Usuario, Clave, Id_Sistema, Amazon_Key, Google_Key, Apple_Key, Other_Key, Time_Stamp) VALUES ('{usuario}', '{clave}', '{id_sistema}', '{amazon_key}', '{google_key}', '{apple_key}', '{other_key}', UNIX_TIMESTAMP())"
+            query = f"INSERT INTO TB_DOMCLOUD_USER (Usuario, Clave, Id_Sistema, Amazon_Key, Google_Key, Apple_Key, Other_Key, Estado, Time_Stamp) VALUES ('{usuario}', '{clave}', '{id_sistema}', '{amazon_key}', '{google_key}', '{apple_key}', '{other_key}', {estado}, UNIX_TIMESTAMP())"
             if mysql_execute(query) > 0:
                 logger.info(f"Usuario {usuario} de cliente {id_sistema} agregado al sistema")
         else:
