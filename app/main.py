@@ -45,6 +45,7 @@ def filename_get(filename: str, request: Request):
     if auth_token != None:
         system = auth_token_valid(auth_token)
         if system != None:
+            logger.info(f"[GET] {filename} - Usuario autenticado para sistema: {system}")
             return FileResponse(file_path)
 
     return FileResponse(BASE_DIR / "login.html")
@@ -64,11 +65,14 @@ async def filename_post(filename: str, request: Request):
         form = await request.form()   # ← parsea x-www-form-urlencoded
         data = dict(form)
 
+        """
         if auth_token != None:
             system = auth_token_valid(auth_token)
             if system != None:
+                logger.info(f"[POST] {filename} - Usuario autenticado para sistema: {system}")
                 return FileResponse(BASE_DIR / "menu.html")
-
+        """
+        
         user = data.get("user", None)
         password = data.get("password", None)
 
@@ -94,6 +98,7 @@ async def filename_post(filename: str, request: Request):
         if auth_token != None:
             system = auth_token_valid(auth_token)
             if system != None:
+                logger.info(f"[POST] {filename} - Usuario autenticado para sistema: {system}")
                 return FileResponse(file_path)
 
         return FileResponse(BASE_DIR / "login.html")

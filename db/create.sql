@@ -12,6 +12,8 @@ CREATE TABLE TB_DOMCLOUD_USER (
 Usuario varchar(256),
 Clave varchar(256),
 Id_Sistema varchar(256),
+Auth_Token_Value varchar(256),
+Auth_Token_Time bigint,
 Amazon_Key varchar(256),
 Google_Key varchar(256),
 Apple_Key varchar(256),
