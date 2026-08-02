@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
-from app.client_utils import update_client_data, update_client_user_data
+from app.client_utils import get_client_data, update_client_data, update_client_user_data
+from app.auth_utils import auth_token_valid
 
 logger = get_daily_logger()
 
@@ -16,12 +17,29 @@ async def objetos_get(request: Request):
     #
     funcion = request_params.get("funcion", None)
     grupo = request_params.get("grupo", None)
+    #
+    auth_token = request.cookies.get("auth_token", None)
+    if auth_token != None:
+        system = auth_token_valid(auth_token)
+        if system == None:
+            return {"error": 3, "message": "Auth Token Vencido o Inválido"}
+    else:
+        return {"error": 3, "message": "No Auth Token"}
+    #
     if funcion == "list":
-        return {"error": 0, "message": "Ok"}
-
-
-
-    return {"error": 0, "message": "Ok"}
+        if grupo is not None:
+            if system is not None:
+                result = get_client_data(system, grupo)
+                if result is not None:
+                    return {"error": 0, "message": "Ok", "data": result}
+                else:
+                    return {"error": 2, "message": "No se encontraron datos"}
+            else:
+                return {"error": 3, "message": "Falta el parámetro System_Key"}
+        else:
+            return {"error": 3, "message": "Falta el parámetro grupo"}
+    else:
+        return {"error": 3, "message": "Parámetro funcion inválido o no especificado"}
 
 @router.post("/dompi_cloud_notif.cgi")
 async def dompi_cloud_notif_post(request: Request):
@@ -32,7 +50,7 @@ async def dompi_cloud_notif_post(request: Request):
     # Campos generales
     system = data.get("System_Key", None)
     estado = data.get("Estado", None)
-
+ 
     # Campos de Assign
     ass_id = data.get("ASS_Id", None)
     objeto = data.get("Objeto", None)
@@ -61,6 +79,10 @@ async def dompi_cloud_notif_post(request: Request):
             update_client_data(system, ass_id, objeto, tipo, estado, icono_apagado, icono_encendido, grupo_visual, planta, cord_x, cord_y, coeficiente, analog_mult_div, analog_mult_div_valor, flags)
         elif user_id != None and clave != None:
             update_client_user_data(user_id, clave, system, amazon_key, google_key, apple_key, other_key, estado)
+        else:
+            update_client_data(system)
+    else:
+        logger.info(f"[dompi_cloud_notif.cgi] No se pudo obtener el System_Key [{data}]")
 
     return {"error": 0, "message": "Ok"}
 

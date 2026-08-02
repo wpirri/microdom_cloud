@@ -45,7 +45,7 @@ def filename_get(filename: str, request: Request):
     if auth_token != None:
         system = auth_token_valid(auth_token)
         if system != None:
-            logger.info(f"[GET] {filename} - Usuario autenticado para sistema: {system}")
+            #logger.info(f"[GET] {filename} - Usuario autenticado para sistema: {system}")
             return FileResponse(file_path)
 
     return FileResponse(BASE_DIR / "login.html")
@@ -79,8 +79,6 @@ async def filename_post(filename: str, request: Request):
         if not user or not password:
             return FileResponse(file_path)
 
-        logger.info(f"[POST] {filename} - Usuario: {user} - Clave: {password}")
-
         auth_result = get_user_auth(user, password)
         if auth_result is None:
             return FileResponse(file_path)
@@ -98,7 +96,7 @@ async def filename_post(filename: str, request: Request):
         if auth_token != None:
             system = auth_token_valid(auth_token)
             if system != None:
-                logger.info(f"[POST] {filename} - Usuario autenticado para sistema: {system}")
+                #logger.info(f"[POST] {filename} - Usuario autenticado para sistema: {system}")
                 return FileResponse(file_path)
 
         return FileResponse(BASE_DIR / "login.html")

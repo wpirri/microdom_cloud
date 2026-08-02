@@ -25,7 +25,7 @@ Flags integer DEFAULT 0,
 PRIMARY KEY (System_Key, Id)
 );
 """
-def update_client_data(system, ass_id, objeto, tipo, estado, icono_apagado, icono_encendido, grupo_visual, planta, cord_x, cord_y, coeficiente, analog_mult_div, analog_mult_div_valor, flags):
+def update_client_data(system, ass_id=None, objeto=None, tipo=None, estado=None, icono_apagado=None, icono_encendido=None, grupo_visual=None, planta=None, cord_x=None, cord_y=None, coeficiente=None, analog_mult_div=None, analog_mult_div_valor=None, flags=None):
     if system != None:
         if ass_id != None:
             query = f"UPDATE TB_DOMCLOUD_ASSIGN SET Time_Stamp = UNIX_TIMESTAMP(), Objeto='{objeto}', Tipo={tipo}, Estado={estado}, Icono_Apagado='{icono_apagado}', Icono_Encendido='{icono_encendido}', Grupo_Visual={grupo_visual}, Planta={planta}, Cord_x={cord_x}, Cord_y={cord_y}, Coeficiente={coeficiente}, Analog_Mult_Div={analog_mult_div}, Analog_Mult_Div_Valor={analog_mult_div_valor}, Flags={flags} WHERE System_Key='{system}' AND Id='{ass_id}'"
@@ -70,7 +70,5 @@ def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, 
         else:
             logger.info(f"Usuario {usuario} de cliente {id_sistema} actualizado")
 
-def get_object():
-    query = "SELECT * FROM TB_DOMCLOUD_ASSIGN"
-    result = mysql_query(query)
-    return result
+def get_client_data(id_sistema, grupo):
+    return mysql_query(f"SELECT * FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Grupo_Visual = {grupo}")
