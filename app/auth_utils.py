@@ -32,3 +32,9 @@ def auth_token_valid(auth_token):
     else:
         return None
     
+def new_auth_token(system):
+    if system is None:
+        return None
+    auth_token = generate_auth_token(255)
+    mysql_execute(f"UPDATE TB_DOMCLOUD_USER SET Auth_Token_Value = '{auth_token}', Auth_Token_Time = UNIX_TIMESTAMP() WHERE Id_Sistema = '{system}'")
+    return {"key":"auth_token", "value":auth_token}

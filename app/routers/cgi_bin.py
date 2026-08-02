@@ -1,11 +1,33 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
-from app.client_utils import get_client_data, update_client_data, update_client_user_data
+from app.client_utils import dequeue_action, enqueue_action, get_client_data, update_client_data, update_client_user_data
 from app.auth_utils import auth_token_valid
 
 logger = get_daily_logger()
 
 router = APIRouter(prefix="/cgi-bin", tags=["cgi"])
+
+# objetos.cgi
+@router.get("/touch.cgi")
+async def touch_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    #headers = dict(request.headers)
+    #
+    objeto = request_params.get("objeto", None)
+    #
+    auth_token = request.cookies.get("auth_token", None)
+    if auth_token != None:
+        system = auth_token_valid(auth_token)
+        if system == None:
+            return {"error": 3, "message": "Auth Token Vencido o Inválido"}
+    else:
+        return {"error": 3, "message": "No Auth Token"}
+    #
+    enqueue_action(system, objeto)
+    return {"error": 0, "message": "Ok"}
+
 
 # objetos.cgi
 @router.get("/objetos.cgi")
@@ -84,7 +106,7 @@ async def dompi_cloud_notif_post(request: Request):
     else:
         logger.info(f"[dompi_cloud_notif.cgi] No se pudo obtener el System_Key [{data}]")
 
-    return {"error": 0, "message": "Ok"}
+    return dequeue_action(system)
 
 # dompi_cloud_abmuser.cgi
 @router.get("/dompi_cloud_abmuser.cgi")

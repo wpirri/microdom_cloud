@@ -32,9 +32,9 @@ def update_client_data(system, ass_id=None, objeto=None, tipo=None, estado=None,
             if mysql_execute(query) == 0:
                 query = f"INSERT INTO TB_DOMCLOUD_ASSIGN (System_Key, Id, Objeto, Tipo, Estado, Icono_Apagado, Icono_Encendido, Grupo_Visual, Planta, Cord_x, Cord_y, Coeficiente, Analog_Mult_Div, Analog_Mult_Div_Valor, Flags, Time_Stamp) VALUES ('{system}', '{ass_id}', '{objeto}', {tipo}, {estado}, '{icono_apagado}', '{icono_encendido}', {grupo_visual}, {planta}, {cord_x}, {cord_y}, {coeficiente}, {analog_mult_div}, {analog_mult_div_valor}, {flags}, UNIX_TIMESTAMP())"
                 if mysql_execute(query) > 0:
-                    logger.info(f"Objeto {objeto} en estado {estado} agregado al cliente {system}")
+                    logger.info(f"Objeto Agregado: {system}/{objeto}")
             else:
-                logger.info(f"Objeto {objeto} de cliente {system} pasa a estado {estado}")
+                logger.info(f"Objeto Actualizado: {system}/{objeto}")
         else:
             query = f"UPDATE TB_DOMCLOUD_ASSIGN SET Time_Stamp = UNIX_TIMESTAMP()  WHERE System_Key='{system}' AND Id='0'"
             if mysql_execute(query) == 0:
@@ -66,9 +66,37 @@ def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, 
         if mysql_execute(query) == 0:
             query = f"INSERT INTO TB_DOMCLOUD_USER (Usuario, Clave, Id_Sistema, Amazon_Key, Google_Key, Apple_Key, Other_Key, Estado, Time_Stamp) VALUES ('{usuario}', '{clave}', '{id_sistema}', '{amazon_key}', '{google_key}', '{apple_key}', '{other_key}', {estado}, UNIX_TIMESTAMP())"
             if mysql_execute(query) > 0:
-                logger.info(f"Usuario {usuario} de cliente {id_sistema} agregado al sistema")
+                logger.info(f"Usuario agregado: {id_sistema}/{usuario}")
         else:
-            logger.info(f"Usuario {usuario} de cliente {id_sistema} actualizado")
+            logger.info(f"Usuario actualizado: {id_sistema}/{usuario}")
 
 def get_client_data(id_sistema, grupo):
     return mysql_query(f"SELECT * FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Grupo_Visual = {grupo}")
+
+def enqueue_action(id_sistema, objeto):
+    query_result = mysql_query(f"SELECT Estado, Tipo FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Objeto = '{objeto}'")
+    if query_result is not None and len(query_result) > 0:
+        estado = query_result[0]['Estado']
+        tipo = query_result[0]['Tipo']
+        if estado == 0:
+            accion = "ON"
+        elif estado == 1:
+            if tipo >= 10:
+                accion = "AUTO"
+            else:
+                accion = "OFF"
+        else:
+            accion = "OFF"
+
+        logger.info(f"[dompi_cloud_notif.cgi] Accion: {id_sistema}/{objeto} -> {accion}")
+        mysql_execute(f"INSERT INTO TB_DOMCLOUD_NOTIF (System_Key, Objeto, Accion, Time_Stamp) VALUES ('{id_sistema}', '{objeto}', '{accion}', UNIX_TIMESTAMP())")
+
+def dequeue_action(id_sistema):
+    query_result = mysql_query(f"SELECT Objeto, Accion FROM TB_DOMCLOUD_NOTIF WHERE System_Key = '{id_sistema}' ORDER BY Time_Stamp ASC LIMIT 1")
+    if query_result is not None and len(query_result) > 0:
+        objeto = query_result[0]['Objeto']
+        accion = query_result[0]['Accion']
+        mysql_execute(f"DELETE FROM TB_DOMCLOUD_NOTIF WHERE System_Key = '{id_sistema}' AND Objeto = '{objeto}' AND Accion = '{accion}'")
+        return {"objeto": objeto, "accion": accion, "error": 0, "message": "Ok"}
+    else:
+        return {"error": 0, "message": "Ok"}
