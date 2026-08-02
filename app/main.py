@@ -54,7 +54,7 @@ def filename_get(filename: str, request: Request):
                 value=auth_result["value"],
                 httponly=True,
                 samesite="lax",
-                max_age=3600
+                max_age=600
             )
             # Ok
             return response
@@ -94,7 +94,7 @@ async def filename_post(filename: str, request: Request):
             value=auth_result["value"],
             httponly=True,
             samesite="lax",
-            max_age=3600
+            max_age=600
         )
         return response
     else:
@@ -111,7 +111,7 @@ async def filename_post(filename: str, request: Request):
                     value=auth_result["value"],
                     httponly=True,
                     samesite="lax",
-                    max_age=3600
+                    max_age=600
                 )
                 # Ok
                 return response

@@ -24,7 +24,7 @@ def get_user_auth(user, password):
 
 def auth_token_valid(auth_token):
     #logger.info(f"[auth_token_valid] Token: {auth_token}")
-    query_result = mysql_query(f"SELECT Id_Sistema FROM TB_DOMCLOUD_USER WHERE Auth_Token_Value = '{auth_token}' AND (UNIX_TIMESTAMP() - Auth_Token_Time) < 3600")
+    query_result = mysql_query(f"SELECT Id_Sistema FROM TB_DOMCLOUD_USER WHERE Auth_Token_Value = '{auth_token}' AND (UNIX_TIMESTAMP() - Auth_Token_Time) < 600")
     if query_result:
         # Cada vez que se usa el token de autorizacion, se actualiza el tiempo de expiración
         mysql_execute(f"UPDATE TB_DOMCLOUD_USER SET Auth_Token_Time = UNIX_TIMESTAMP() WHERE Id_Sistema = '{query_result[0]['Id_Sistema']}'")

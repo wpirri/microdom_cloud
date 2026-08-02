@@ -71,7 +71,7 @@ def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, 
             logger.info(f"Usuario actualizado: {id_sistema}/{usuario}")
 
 def get_client_data(id_sistema, grupo):
-    return mysql_query(f"SELECT * FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Grupo_Visual = {grupo}")
+    return mysql_query(f"SELECT * FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Grupo_Visual = {grupo} ORDER BY Objeto ASC")
 
 def enqueue_action(id_sistema, objeto):
     query_result = mysql_query(f"SELECT Estado, Tipo FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Objeto = '{objeto}'")

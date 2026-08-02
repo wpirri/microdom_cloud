@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "Building microdom-cloud docker image..."
+docker build -t microdom-cloud .
 echo "Stop microdom-cloud..."
 docker stop microdom-cloud
 sleep 3
@@ -18,4 +20,3 @@ docker run -it \
   -v /var/lib/microdom_cloud/html:/app/html \
   -v /var/lib/microdom_cloud/download:/app/download \
   -p 8082:8082 microdom-cloud
-
