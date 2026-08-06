@@ -73,23 +73,26 @@ def update_client_user_data(usuario, clave, id_sistema, amazon_key, google_key, 
 def get_client_data(id_sistema, grupo):
     return mysql_query(f"SELECT * FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Grupo_Visual = {grupo} ORDER BY Objeto ASC")
 
-def enqueue_action(id_sistema, objeto):
+def enqueue_action(id_sistema, objeto, action=None):
     query_result = mysql_query(f"SELECT Estado, Tipo FROM TB_DOMCLOUD_ASSIGN WHERE System_Key = '{id_sistema}' AND Objeto = '{objeto}'")
-    if query_result is not None and len(query_result) > 0:
-        estado = query_result[0]['Estado']
-        tipo = query_result[0]['Tipo']
-        if estado == 0:
-            accion = "ON"
-        elif estado == 1:
-            if tipo >= 10:
-                accion = "AUTO"
+    if  query_result is not None and len(query_result) > 0:
+        if action is not None:
+            accion = action
+        else:
+            estado = query_result[0]['Estado']
+            tipo = query_result[0]['Tipo']
+            if estado == 0:
+                accion = "ON"
+            elif estado == 1:
+                if tipo >= 10:
+                    accion = "AUTO"
+                else:
+                    accion = "OFF"
             else:
                 accion = "OFF"
-        else:
-            accion = "OFF"
 
-        logger.info(f"[dompi_cloud_notif.cgi] Accion: {id_sistema}/{objeto} -> {accion}")
-        mysql_execute(f"INSERT INTO TB_DOMCLOUD_NOTIF (System_Key, Objeto, Accion, Time_Stamp) VALUES ('{id_sistema}', '{objeto}', '{accion}', UNIX_TIMESTAMP())")
+            logger.info(f"[dompi_cloud_notif.cgi] Accion: {id_sistema}/{objeto} -> {accion}")
+            mysql_execute(f"INSERT INTO TB_DOMCLOUD_NOTIF (System_Key, Objeto, Accion, Time_Stamp) VALUES ('{id_sistema}', '{objeto}', '{accion}', UNIX_TIMESTAMP())")
 
 def dequeue_action(id_sistema):
     query_result = mysql_query(f"SELECT Objeto, Accion FROM TB_DOMCLOUD_NOTIF WHERE System_Key = '{id_sistema}' ORDER BY Time_Stamp ASC LIMIT 1")

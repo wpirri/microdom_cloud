@@ -1,20 +1,66 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
 from app.client_utils import dequeue_action, enqueue_action, get_client_data, update_client_data, update_client_user_data
-from app.auth_utils import auth_token_valid
+from app.auth_utils import auth_token_valid, get_client_system_by_amazon_key
+from app.amazon_alexa import alexa_discover, alexa_turn_on, alexa_turn_off, alexa_turn_lock, alexa_turn_unlock, alexa_turn_report_state
 
 logger = get_daily_logger()
 
 router = APIRouter(prefix="/cgi-bin", tags=["cgi"])
+
+##############################################################################
+# dompi_cloud_amazon.cgi
+# "CONTENT_LENGTH":"1170","REMOTE_ADDR":"18.234.120.118","REQUEST_METHOD":"POST","REQUEST_URI":"/cgi-bin/dompi_cloud_amazon.cgi/?funcion=TurnOn"
+# "request":{"data":{"directive":{"header":{"messageId":"06531875-50b2-4be6-89fe-2f80cdd4361c","namespace":"Alexa.PowerController","name":"TurnOn","payloadVersion":"3","correlationToken":"SUdTVEs6AAE6AAg6eyJpZCI6IjZhYmIxMzQxLWI3ZGUtNDE0Yi05Yjk3LTY2NmZjYjRmNmY3MyIsInVyaSI6Imh0dHBzOi8vZC1hY3JzLW5hLXAtN2UtMjdkMjdhNGIudXMtZWFzdC0xLmFtYXpvbi5jb206OTQ0NCIsInNlc3Npb25JZCI6IjNhODEwYmI4LTRlNWEtNDkyNy1iMjc4LTI2ZTNmOTdhZmIwNSJ9"},"endpoint":{"scope":{"type":"BearerToken","token":"Atza|gQAZoMG5AwEBAEmtP2QdzbG0dYSZux6JpxqSso5w6pZGt-KcjG91n3DmH7SsPqFx9ioekTqCEAr4YcZd4XbLGnYf8BNBlzw3PwxMHwFdWu4iecB5N8tHaugUuVFCBQyxUOp_88ZHcCixOtMi6A15zeYc08EdbstKCs9UuWzdOGSn78ETDt-s_1-NIUZgZCf-BNDBAdGgQd7sH8e9dmwoCz7FX6MS7xCA51A7uyuL-eAsOoA8KIiGzhIgZI1ZbWfmp4-Cz07eUke1w7z_mlZl2I31z7KB8uWXOXJGadTh3PeiI9WaiF5e5yyGqtpH6xIf75eiiuK8AkS8ArNSRjaD1bmjn2Pf9dbPPKwOVlzneyCXzQLWa8YQlLQMNwDK-d64rRqnabX8okClaeJacupWgF9bsbNkuvXfR3ng8BRxud3vEg3qPzPEQNwvDwvvyrggSj-IbP5YFT477YYGYwFPrGp1P34jLYDpldGMvb2JJxpjFkFOZhskqgdjNhlDCuLRdm17HHWO084"},"endpointId":"Luz-Taller","cookie":{}},"payload":{}}},"user":{"user_id":"amzn1.account.AFJBR7A4TM7ST4ZICQ2DD4JAW2RQ","email":"walter@pirri.com.ar"}}
+@router.post("/dompi_cloud_amazon.cgi")
+async def alexa_post(request: Request):
+    # Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+    #
+    funcion = request_params.get("funcion", None)
+    user = data.get("user", None)
+    email = data.get("email", None)
+    directive = data.get("directive", None)
+
+    if funcion is None or user is None or email is None or directive is None:
+        return {"error": 1, "message": "Faltan parámetros"}
+
+    system = get_client_system_by_amazon_key(email)
+    if system is None:
+        return {"error": 2, "message": "Usuario no registrado"}
+
+    if funcion == "Discover":
+        return {"error": 0, "message": "Ok", "response": alexa_discover(system)}
+    elif funcion == "TurnOn":
+
+        return {"error": 0, "message": "Ok"}
+    elif funcion == "TurnOff":
+
+        return {"error": 0, "message": "Ok"}
+    elif funcion == "ReportState":
+
+        return {"error": 0, "message": "Ok"}
+    elif funcion == "Lock":
+
+        return {"error": 0, "message": "Ok"}
+    elif funcion == "Unlock":
+
+        return {"error": 0, "message": "Ok"}
+
+
+
+    return {"error": 2, "message": "Funcion desconocida o no especificada"}
 
 # objetos.cgi
 @router.get("/touch.cgi")
 async def touch_get(request: Request):
     # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    #headers = dict(request.headers)
-    #
     objeto = request_params.get("objeto", None)
     #
     auth_token = request.cookies.get("auth_token", None)
@@ -34,9 +80,6 @@ async def touch_get(request: Request):
 async def objetos_get(request: Request):
     # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    #headers = dict(request.headers)
-    #
     funcion = request_params.get("funcion", None)
     grupo = request_params.get("grupo", None)
     #
@@ -111,109 +154,21 @@ async def dompi_cloud_notif_post(request: Request):
 # dompi_cloud_abmuser.cgi
 @router.get("/dompi_cloud_abmuser.cgi")
 async def dompi_cloud_abmuser_get(request: Request):
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
 
     return {"error": 0, "message": "Ok"}
 
 @router.post("/dompi_cloud_abmuser.cgi")
 async def dompi_cloud_abmuser_post(request: Request):
-    # Leer el POST
-    form = await request.form()   # ← parsea x-www-form-urlencoded
-    data = dict(form)
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
 
     return {"error": 0, "message": "Ok"}
 
 # dompi_cloud_alarma.cgi
 @router.get("/dompi_cloud_alarma.cgi")
 async def abmsys_get(request: Request):
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
 
     return {"error": 0, "message": "Ok"}
 
 @router.post("/dompi_cloud_alarma.cgi")
 async def dompi_cloud_alarma_post(request: Request):
-    # Leer el POST
-    form = await request.form()   # ← parsea x-www-form-urlencoded
-    data = dict(form)
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
-
-    return {"error": 0, "message": "Ok"}
-
-# dompi_cloud_amazon.cgi
-@router.get("/dompi_cloud_amazon.cgi")
-async def dompi_cloud_amazon_get(request: Request):
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
-
-    return {"error": 0, "message": "Ok"}
-
-@router.post("/dompi_cloud_amazon.cgi")
-async def dompi_cloud_amazon_post(request: Request):
-    # Leer el POST
-    form = await request.form()   # ← parsea x-www-form-urlencoded
-    data = dict(form)
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
-
-    return {"error": 0, "message": "Ok"}
-
-# dompi_cloud_mobile.cgi
-@router.get("/dompi_cloud_mobile.cgi")
-async def dompi_cloud_mobile_get(request: Request):
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
-
-    return {"error": 0, "message": "Ok"}
-
-@router.post("/dompi_cloud_mobile.cgi")
-async def dompi_cloud_mobile_post(request: Request):
-    # Leer el POST
-    form = await request.form()   # ← parsea x-www-form-urlencoded
-    data = dict(form)
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
-
-    return {"error": 0, "message": "Ok"}
-
-# dompi_cloud_status.cgi
-@router.get("/dompi_cloud_status.cgi")
-async def dompi_cloud_status_get(request: Request):
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
-
-    return {"error": 0, "message": "Ok"}
-
-@router.post("/dompi_cloud_status.cgi")
-async def dompi_cloud_status_post(request: Request):
-    # Leer el POST
-    form = await request.form()   # ← parsea x-www-form-urlencoded
-    data = dict(form)
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Headers (variables del navegador)
-    headers = dict(request.headers)
 
     return {"error": 0, "message": "Ok"}
