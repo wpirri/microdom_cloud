@@ -91,8 +91,8 @@ def enqueue_action(id_sistema, objeto, action=None):
             else:
                 accion = "OFF"
 
-            logger.info(f"[dompi_cloud_notif.cgi] Accion: {id_sistema}/{objeto} -> {accion}")
-            mysql_execute(f"INSERT INTO TB_DOMCLOUD_NOTIF (System_Key, Objeto, Accion, Time_Stamp) VALUES ('{id_sistema}', '{objeto}', '{accion}', UNIX_TIMESTAMP())")
+        logger.info(f"[dompi_cloud_notif.cgi] Accion: {id_sistema}/{objeto} -> {accion}")
+        mysql_execute(f"INSERT INTO TB_DOMCLOUD_NOTIF (System_Key, Objeto, Accion, Time_Stamp) VALUES ('{id_sistema}', '{objeto}', '{accion}', UNIX_TIMESTAMP())")
 
 def dequeue_action(id_sistema):
     query_result = mysql_query(f"SELECT Objeto, Accion FROM TB_DOMCLOUD_NOTIF WHERE System_Key = '{id_sistema}' ORDER BY Time_Stamp ASC LIMIT 1")
