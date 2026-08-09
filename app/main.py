@@ -36,7 +36,7 @@ def root():
 @app.get("/{filename}", response_class=HTMLResponse)
 def filename_get(filename: str, request: Request):
     file_path = BASE_DIR / filename
-    logger.info(f"[GET] {filename}")
+    #logger.info(f"[GET] {filename}")
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
@@ -59,12 +59,13 @@ def filename_get(filename: str, request: Request):
             # Ok
             return response
     # Si no tiene cookie de autenticación válida, lo devuelvo al login
+    logger.info(f"[GET] {filename} - No autenticado. Dvolviendo login")
     return FileResponse(BASE_DIR / "login.html")
 
 @app.post("/{filename}", response_class=HTMLResponse)
 async def filename_post(filename: str, request: Request):
     file_path = BASE_DIR / filename
-    logger.info(f"[POST] {filename}")
+    #logger.info(f"[POST] {filename}")
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
@@ -116,6 +117,7 @@ async def filename_post(filename: str, request: Request):
                 # Ok
                 return response
         # Si no es login.html y no tiene cookie de autenticación válida, lo devuelvo al login
+        logger.info(f"[POST] {filename} - No autenticado. Dvolviendo login")
         return FileResponse(BASE_DIR / "login.html")
 
 

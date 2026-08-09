@@ -51,3 +51,27 @@ docker run --rm -it \
 docker logs <nombre_o_id>
 docker logs -f <container>
 docker logs --tail 100 -t <container>
+
+
+GitHub
+========================
+
+Para subir a GHCR
+docker build -t microdom-cloud:latest .
+docker tag microdom-cloud:latest ghcr.io/wpirri/microdom-cloud:latest
+docker push ghcr.io/wpirri/microdom-cloud:latest
+
+
+Ejecutar desde el repositorio
+docker run -it \
+  -d --restart unless-stopped \
+  -e DBUSER=dompi_web \
+  -e DBPASSWORD=dompi_web \
+  -e DBHOST=192.168.10.32 \
+  -e DBNAME=DB_DOMPICLOUD \
+  --name microdom-cloud \
+  -v /etc/microdom.conf:/app/etc/microdom.conf \
+  -v /var/log/microdom:/app/logs \
+  -v /var/lib/microdom_cloud/html:/app/html \
+  -v /var/lib/microdom_cloud/download:/app/download \
+  -p 8082:8082 ghcr.io/wpirri/microdom-cloud:latest
