@@ -13,24 +13,24 @@ def alexa_turn_on(system, objeto):
     logger.info(f"alexa_turn_on: system={system}, objeto={objeto}")
     enqueue_action(system, objeto, action="ON")
     # {"resp_code": "0", "resp_msg": "Ok", "Objeto": "Luz Taller", "Estado": "1", "Ultimo_Update": "2026-08-07 18:13:37" }
-    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    fecha_hora = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
     return {"resp_code": "0", "resp_msg": "Ok", "Objeto": objeto, "Estado": "1", "Ultimo_Update": fecha_hora}
 
 def alexa_turn_off(system, objeto):
     logger.info(f"alexa_turn_off: system={system}, objeto={objeto}")
     enqueue_action(system, objeto, action="OFF")
-    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    fecha_hora = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
     return {"resp_code": "0", "resp_msg": "Ok", "Objeto": objeto, "Estado": "0", "Ultimo_Update": fecha_hora}
 
 def alexa_lock(system, objeto):
     logger.info(f"alexa_lock: system={system}, objeto={objeto}")
-    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    fecha_hora = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
     return {"resp_code": "0", "resp_msg": "Ok", "Objeto": objeto, "Estado": "1", "Ultimo_Update": fecha_hora}
 
 def alexa_unlock(system, objeto):
     logger.info(f"alexa_unlock: system={system}, objeto={objeto}")
     enqueue_action(system, objeto, action="PULSE")
-    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    fecha_hora = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
     return {"resp_code": "0", "resp_msg": "Ok", "Objeto": objeto, "Estado": "0", "Ultimo_Update": fecha_hora}
 
 def alexa_report_state(system, objeto):
