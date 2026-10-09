@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#sudo mkdir -p /var/log/microdom
+#sudo chmod 0777 /var/log/microdom
+#sudo cp -uva etc/microdom.conf /etc
+
 echo "Building microdom-cloud docker image..."
 docker build -t microdom-cloud .
 echo "Stop microdom-cloud..."
