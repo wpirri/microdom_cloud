@@ -5,7 +5,7 @@ from pathlib import Path
 from app.log_utils import get_daily_logger
 from app.auth_utils import get_user_auth, auth_token_valid, new_auth_token
 
-from app.routers import cgi_bin, download
+from app.routers import home, download
 
 app = FastAPI(
     title="Administración remota de sistemas de domótica",
@@ -15,7 +15,7 @@ app = FastAPI(
 logger = get_daily_logger()
 
 # Routers existentes
-app.include_router(cgi_bin.router)
+app.include_router(home.router)
 app.include_router(download.router)
 
 # Archivos estáticos específicos
