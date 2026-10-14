@@ -51,7 +51,7 @@ def enqueue_action(id_sistema, objeto, action=None):
             else:
                 accion = "OFF"
 
-        logger.info(f"[dompi_cloud_notif.cgi] Accion: {id_sistema}/{objeto} -> {accion}")
+        logger.info(f"[enqueue] Accion: {id_sistema}/{objeto} -> {accion}")
         mysql_execute(f"INSERT INTO TB_DOMCLOUD_NOTIF (System_Key, Objeto, Accion, Time_Stamp) VALUES ('{id_sistema}', '{objeto}', '{accion}', UNIX_TIMESTAMP())")
 
 def dequeue_action(id_sistema):

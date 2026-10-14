@@ -22,5 +22,4 @@ docker run -it \
   -v /etc/microdom.conf:/app/etc/microdom.conf \
   -v /var/log/microdom:/app/logs \
   -v /var/lib/microdom_cloud/html:/app/html \
-  -v /var/lib/microdom_cloud/download:/app/download \
   -p 8082:8082 microdom-cloud

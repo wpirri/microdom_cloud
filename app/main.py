@@ -4,8 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.log_utils import get_daily_logger
 from app.auth_utils import get_user_auth, auth_token_valid, new_auth_token
-
-from app.routers import home, download
+from app.client_utils import get_client_data, enqueue_action
 
 app = FastAPI(
     title="Administración remota de sistemas de domótica",
@@ -13,10 +12,6 @@ app = FastAPI(
 )
 
 logger = get_daily_logger()
-
-# Routers existentes
-app.include_router(home.router)
-app.include_router(download.router)
 
 # Archivos estáticos específicos
 app.mount("/css", StaticFiles(directory="/app/html/css"), name="css")
@@ -28,6 +23,51 @@ BASE_DIR = Path("/app/html")  # Cambialo según tu mapeo real
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# Listado de objetos por grupo
+@app.get("/objetos")
+async def objetos_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    grupo = request_params.get("grupo", None)
+    #
+    auth_token = request.cookies.get("auth_token", None)
+    if auth_token != None:
+        system = auth_token_valid(auth_token)
+        if system == None:
+            return {"error": 3, "message": "Auth Token Vencido o Inválido"}
+    else:
+        return {"error": 3, "message": "No Auth Token"}
+    #
+    if grupo is not None:
+        if system is not None:
+            result = get_client_data(system, grupo)
+            if result is not None:
+                return {"error": 0, "message": "Ok", "response": result}
+            else:
+                return {"error": 2, "message": "No se encontraron datos"}
+        else:
+            return {"error": 3, "message": "Falta el parámetro System_Key"}
+    else:
+        return {"error": 3, "message": "Falta el parámetro grupo"}
+
+# Toque a los objetos (para encender/apagar o cambiar de estado)
+@app.get("/touch")
+async def touch_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    objeto = request_params.get("objeto", None)
+    #
+    auth_token = request.cookies.get("auth_token", None)
+    if auth_token != None:
+        system = auth_token_valid(auth_token)
+        if system == None:
+            return {"error": 3, "message": "Auth Token Vencido o Inválido"}
+    else:
+        return {"error": 3, "message": "No Auth Token"}
+    #
+    enqueue_action(system, objeto)
+    return {"error": 0, "message": "Ok"}
 
 @app.get("/", response_class=HTMLResponse)
 def root():
@@ -119,12 +159,3 @@ async def filename_post(filename: str, request: Request):
         # Si no es login.html y no tiene cookie de autenticación válida, lo devuelvo al login
         logger.info(f"[POST] {filename} - No autenticado. Dvolviendo login")
         return FileResponse(BASE_DIR / "login.html")
-
-
-@app.get("/data/{filename}", response_class=HTMLResponse)
-def root_data(filename: str):
-    file_path = BASE_DIR / "data" / filename
-    # Validar existencia
-    if not file_path.exists() or not file_path.is_file():
-        raise HTTPException(status_code=404, detail="Archivo no encontrado")
-    return FileResponse(file_path)
